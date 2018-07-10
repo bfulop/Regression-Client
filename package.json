@@ -1,0 +1,23 @@
+{
+  "name": "regression-client",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bfulop/Regression-Client.git"
+  },
+  "author": "Balint Fulop <bfulop@mac.com> (http://abundancia.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bfulop/Regression-Client/issues"
+  },
+  "homepage": "https://github.com/bfulop/Regression-Client#readme",
+  "dependencies": {
+    "@hyperapp/html": "^1.1.1",
+    "hyperapp": "^1.2.6"
+  }
+}
