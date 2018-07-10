@@ -60,3 +60,6 @@ typings/
 # next.js build output
 .next
 /.cache
+/keys.js
+dist/keys.*.js
+dist/keys.*.map

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/bfulop/Regression-Client#readme",
   "dependencies": {
     "@hyperapp/html": "^1.1.1",
-    "hyperapp": "^1.2.6"
+    "hyperapp": "^1.2.6",
+    "ramda": "^0.25.0"
   }
 }
