@@ -63,3 +63,4 @@ typings/
 /keys.js
 dist/keys.*.js
 dist/keys.*.map
+.DS_Store

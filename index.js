@@ -1,6 +1,8 @@
 import { h, app } from "hyperapp"
-import { div, h1, button, pre } from "@hyperapp/html"
+import { div, h1, h2, h3, img, button, pre } from "@hyperapp/html"
 // import * as R from 'ramda'
+
+const sanitizeText = R.compose(R.replace(/\s|\W/g, '_'), r => r.toString(), R.defaultTo('index'))
 
 const getTargets = (state, actions) => {
   return fetch(global.mysecretkeys.serverIP + 'targets')
@@ -9,25 +11,39 @@ const getTargets = (state, actions) => {
 }
 
 const state = {
-  count: 0,
-  targets: [{route: 'hehe'}]
+  targets: []
 }
 
 const actions = {
-  down: () => state => ({ count: state.count - 1 }),
-  up: () => state => ({ count: state.count + 1 }),
   loadTargets: () => getTargets,
-  onGetTargets: value => state => ({ count: state.count + 1, targets: value })
+  onGetTargets: value => state => ({ targets: value })
 }
 
-const renderResults = R.prop('route')
+const renderResults = t => {
+
+  const renderBreakpoint = b => {
+    const renderOneElement = e => {
+      return div([
+        h3(e),
+        img({src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`})
+      ])
+    }
+    return div([
+      h2(R.prop('width', b)),
+      div(R.compose(R.map(renderOneElement), R.prop('elements'))(b))
+    ])
+  }
+  return div([
+    h1(R.prop('route', t)),
+    R.compose(R.map(renderBreakpoint),R.prop('targets'))(t)
+  ])
+
+}
 
 const view = (state, actions) =>
   div([
-    h1(state.count),
-    div(R.map(renderResults, state.targets)),
-    button({ onclick: actions.up }, "+"),
-    button({ onclick: actions.loadTargets }, "load targets")
+    button({ onclick: actions.loadTargets }, "load targets"),
+    div(R.map(renderResults, state.targets))
   ])
 
 app(state, actions, view, document.body)
