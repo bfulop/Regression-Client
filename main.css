@@ -27,6 +27,28 @@ h2 {
   margin-right: 2vw;
 }
 
+.anelem--show {
+  display: block;
+}
+.anelem--hide {
+  display: none;
+}
+.screenshots {
+  position: relative;
+}
+
 .screenshot {
   max-width: 400px;
+}
+
+.screenshot.test {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: .3;
+}
+
+.screenshot.test.regressed {
+  opacity: 1;
+  mix-blend-mode: difference;
 }

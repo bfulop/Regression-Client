@@ -1,8 +1,12 @@
 import { h, app } from "hyperapp"
 import { div, h1, h2, h3, img, button, pre } from "@hyperapp/html"
 import './main.css'
+import { findResult } from "./utils"
 
-
+const logger = r => {
+  console.log(r)
+  return r
+}
 const sanitizeText = R.compose(R.replace(/\s|\W/g, '_'), r => r.toString(), R.defaultTo('index'))
 
 const getTargets = (state, actions) => {
@@ -10,23 +14,41 @@ const getTargets = (state, actions) => {
     .then(r => r.json())
     .then(actions.onGetTargets)
 }
+const getResults = (state, actions) => {
+  return fetch(global.mysecretkeys.serverIP + 'compare')
+    .then(r => r.json())
+    .then(actions.onGetResults)
+}
 
 const state = {
-  targets: []
+  targets: [],
+  results: []
 }
 
 const actions = {
   loadTargets: () => getTargets,
-  onGetTargets: value => state => ({ targets: value })
+  loadResults: () => getResults,
+  onGetTargets: value => R.mergeDeepLeft({ targets: value }),
+  onGetResults: value => R.mergeDeepLeft({results: value})
 }
 
-const renderResults = t => {
+const renderResults = r => t => {
 
   const renderBreakpoint = b => {
     const renderOneElement = e => {
-      return div({className: 'anelem'},[
-        h3(e),
-        img({className: 'screenshot golden', src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`})
+      const filterPath = {
+        route: R.prop('route', t),
+        width: R.prop('width', b),
+        targetelem: e
+      }
+      const currentShot = findResult(filterPath)(r)
+      const diff = R.compose(R.defaultTo(1), R.prop('numDiffPixels'))(currentShot)
+      return div({className: `anelem ${(diff) ? 'anelem--show' : 'anelem--hide'}`},[
+        h3(`${e} - ${diff}`),
+        div({className: 'screenshots'}, [
+          img({className: 'screenshot golden', src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`}),
+          img({className: `screenshot test ${(diff > 1) ? 'regressed' : 'same'}`, src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.testDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`})
+        ])
       ])
     }
     return div({className: 'awidth'},[
@@ -44,8 +66,9 @@ const renderResults = t => {
 const view = (state, actions) =>
   div({className:'main'}, [
     h1('Screenshots list'),
-    button({ onclick: actions.loadTargets }, "load targets"),
-    div(R.map(renderResults, state.targets))
+    button({ onclick: actions.loadTargets }, "load baseline"),
+    button({ onclick: actions.loadResults }, "load regressions"),
+    div(R.map(renderResults(state.results), state.targets))
   ])
 
 app(state, actions, view, document.body)
