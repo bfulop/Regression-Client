@@ -953,7 +953,73 @@ function video(attributes, children) {
 function wbr(attributes, children) {
   return vnode("wbr")(attributes, children);
 }
-},{"hyperapp":6}],2:[function(require,module,exports) {
+},{"hyperapp":6}],403:[function(require,module,exports) {
+var bundleURL = null;
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+
+  return bundleURL;
+}
+
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp):\/\/[^)\n]+/g);
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp):\/\/.+)\/[^/]+$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],402:[function(require,module,exports) {
+var bundle = require('./bundle-url');
+
+function updateLink(link) {
+  var newLink = link.cloneNode();
+  newLink.onload = function () {
+    link.remove();
+  };
+  newLink.href = link.href.split('?')[0] + '?' + Date.now();
+  link.parentNode.insertBefore(newLink, link.nextSibling);
+}
+
+var cssTimeout = null;
+function reloadCSS() {
+  if (cssTimeout) {
+    return;
+  }
+
+  cssTimeout = setTimeout(function () {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    for (var i = 0; i < links.length; i++) {
+      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
+        updateLink(links[i]);
+      }
+    }
+
+    cssTimeout = null;
+  }, 50);
+}
+
+module.exports = reloadCSS;
+},{"./bundle-url":403}],401:[function(require,module,exports) {
+
+var reloadCSS = require('_css_loader');
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"_css_loader":402}],2:[function(require,module,exports) {
 var global = arguments[3];
 "use strict";
 
@@ -961,7 +1027,7 @@ var _hyperapp = require("hyperapp");
 
 var _html = require("@hyperapp/html");
 
-// import * as R from 'ramda'
+require("./main.css");
 
 var sanitizeText = R.compose(R.replace(/\s|\W/g, '_'), function (r) {
   return r.toString();
@@ -992,19 +1058,19 @@ var renderResults = function renderResults(t) {
 
   var renderBreakpoint = function renderBreakpoint(b) {
     var renderOneElement = function renderOneElement(e) {
-      return (0, _html.div)([(0, _html.h3)(e), (0, _html.img)({ src: "" + global.mysecretkeys.serverIP + global.mysecretkeys.goldenDir + "/" + sanitizeText(R.prop('route', t)) + "/" + R.prop('width', b) + "/" + sanitizeText(e) + ".png" })]);
+      return (0, _html.div)({ className: 'anelem' }, [(0, _html.h3)(e), (0, _html.img)({ className: 'screenshot golden', src: "" + global.mysecretkeys.serverIP + global.mysecretkeys.goldenDir + "/" + sanitizeText(R.prop('route', t)) + "/" + R.prop('width', b) + "/" + sanitizeText(e) + ".png" })]);
     };
-    return (0, _html.div)([(0, _html.h2)(R.prop('width', b)), (0, _html.div)(R.compose(R.map(renderOneElement), R.prop('elements'))(b))]);
+    return (0, _html.div)({ className: 'awidth' }, [(0, _html.h2)(R.prop('width', b)), (0, _html.div)({ className: 'elemlist' }, R.compose(R.map(renderOneElement), R.prop('elements'))(b))]);
   };
-  return (0, _html.div)([(0, _html.h1)(R.prop('route', t)), R.compose(R.map(renderBreakpoint), R.prop('targets'))(t)]);
+  return (0, _html.div)({ className: 'target' }, [(0, _html.h1)(R.prop('route', t)), R.compose(R.map(renderBreakpoint), R.prop('targets'))(t)]);
 };
 
 var view = function view(state, actions) {
-  return (0, _html.div)([(0, _html.button)({ onclick: actions.loadTargets }, "load targets"), (0, _html.div)(R.map(renderResults, state.targets))]);
+  return (0, _html.div)({ className: 'main' }, [(0, _html.h1)('Screenshots list'), (0, _html.button)({ onclick: actions.loadTargets }, "load targets"), (0, _html.div)(R.map(renderResults, state.targets))]);
 };
 
 (0, _hyperapp.app)(state, actions, view, document.body);
-},{"hyperapp":6,"@hyperapp/html":7}],18:[function(require,module,exports) {
+},{"hyperapp":6,"@hyperapp/html":7,"./main.css":401}],18:[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 

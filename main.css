@@ -1,0 +1,32 @@
+.main {
+  font-family: sans-serif;
+  background-color: silver;
+}
+
+h1, h2, h3 {
+  font-weight: normal;
+  font-size: 14px;
+  max-width: 400px;
+}
+
+h2 {
+  border-top: 1px solid gray;
+}
+
+.elemlist {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100vw;
+}
+
+.anelem {
+  max-width: 400px;
+  margin-left: 2vw;
+  margin-right: 2vw;
+}
+
+.screenshot {
+  max-width: 400px;
+}
