@@ -15,21 +15,24 @@ const getTargets = (state, actions) => {
     .then(actions.onGetTargets)
 }
 const getResults = (state, actions) => {
+  actions.startLoading()
   return fetch(global.mysecretkeys.serverIP + 'compare')
     .then(r => r.json())
     .then(actions.onGetResults)
 }
 
 const state = {
+  loading: false,
   targets: [],
   results: []
 }
 
 const actions = {
+  startLoading: () => state => ({loading: true}),
   loadTargets: () => getTargets,
   loadResults: () => getResults,
   onGetTargets: value => R.mergeDeepLeft({ targets: value }),
-  onGetResults: value => R.mergeDeepLeft({results: value})
+  onGetResults: value => R.mergeDeepLeft({results: value, loading: false})
 }
 
 const renderResults = r => t => {
@@ -66,6 +69,7 @@ const renderResults = r => t => {
 const view = (state, actions) =>
   div({className:'main'}, [
     h1('Screenshots list'),
+    h2({className: ((state.loading) ? 'loader loader--visible' : 'loader loader--hidden')}, 'Regression server is comparing latest screenshots...'),
     button({ onclick: actions.loadTargets }, "load baseline"),
     button({ onclick: actions.loadResults }, "load regressions"),
     div(R.map(renderResults(state.results), state.targets))

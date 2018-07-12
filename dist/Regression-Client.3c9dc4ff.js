@@ -1019,7 +1019,24 @@ module.exports = reloadCSS;
 var reloadCSS = require('_css_loader');
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":402}],2:[function(require,module,exports) {
+},{"_css_loader":402}],404:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var dynPropEq = R.apply(R.propEq);
+
+var createFilter = R.compose(R.map(dynPropEq), R.toPairs);
+
+var allPropEq = function allPropEq(filterObj) {
+  return R.allPass(createFilter(filterObj));
+};
+
+var findResult = exports.findResult = function findResult(tPath) {
+  return R.find(allPropEq(tPath));
+};
+},{}],2:[function(require,module,exports) {
 var global = arguments[3];
 "use strict";
 
@@ -1029,6 +1046,12 @@ var _html = require("@hyperapp/html");
 
 require("./main.css");
 
+var _utils = require("./utils");
+
+var logger = function logger(r) {
+  console.log(r);
+  return r;
+};
 var sanitizeText = R.compose(R.replace(/\s|\W/g, '_'), function (r) {
   return r.toString();
 }, R.defaultTo('index'));
@@ -1038,39 +1061,65 @@ var getTargets = function getTargets(state, actions) {
     return r.json();
   }).then(actions.onGetTargets);
 };
+var getResults = function getResults(state, actions) {
+  actions.startLoading();
+  return fetch(global.mysecretkeys.serverIP + 'compare').then(function (r) {
+    return r.json();
+  }).then(actions.onGetResults);
+};
 
 var state = {
-  targets: []
+  loading: false,
+  targets: [],
+  results: []
 };
 
 var actions = {
+  startLoading: function startLoading() {
+    return function (state) {
+      return { loading: true };
+    };
+  },
   loadTargets: function loadTargets() {
     return getTargets;
   },
+  loadResults: function loadResults() {
+    return getResults;
+  },
   onGetTargets: function onGetTargets(value) {
-    return function (state) {
-      return { targets: value };
-    };
+    return R.mergeDeepLeft({ targets: value });
+  },
+  onGetResults: function onGetResults(value) {
+    return R.mergeDeepLeft({ results: value, loading: false });
   }
 };
 
-var renderResults = function renderResults(t) {
+var renderResults = function renderResults(r) {
+  return function (t) {
 
-  var renderBreakpoint = function renderBreakpoint(b) {
-    var renderOneElement = function renderOneElement(e) {
-      return (0, _html.div)({ className: 'anelem' }, [(0, _html.h3)(e), (0, _html.img)({ className: 'screenshot golden', src: "" + global.mysecretkeys.serverIP + global.mysecretkeys.goldenDir + "/" + sanitizeText(R.prop('route', t)) + "/" + R.prop('width', b) + "/" + sanitizeText(e) + ".png" })]);
+    var renderBreakpoint = function renderBreakpoint(b) {
+      var renderOneElement = function renderOneElement(e) {
+        var filterPath = {
+          route: R.prop('route', t),
+          width: R.prop('width', b),
+          targetelem: e
+        };
+        var currentShot = (0, _utils.findResult)(filterPath)(r);
+        var diff = R.compose(R.defaultTo(1), R.prop('numDiffPixels'))(currentShot);
+        return (0, _html.div)({ className: "anelem " + (diff ? 'anelem--show' : 'anelem--hide') }, [(0, _html.h3)(e + " - " + diff), (0, _html.div)({ className: 'screenshots' }, [(0, _html.img)({ className: 'screenshot golden', src: "" + global.mysecretkeys.serverIP + global.mysecretkeys.goldenDir + "/" + sanitizeText(R.prop('route', t)) + "/" + R.prop('width', b) + "/" + sanitizeText(e) + ".png" }), (0, _html.img)({ className: "screenshot test " + (diff > 1 ? 'regressed' : 'same'), src: "" + global.mysecretkeys.serverIP + global.mysecretkeys.testDir + "/" + sanitizeText(R.prop('route', t)) + "/" + R.prop('width', b) + "/" + sanitizeText(e) + ".png" })])]);
+      };
+      return (0, _html.div)({ className: 'awidth' }, [(0, _html.h2)(R.prop('width', b)), (0, _html.div)({ className: 'elemlist' }, R.compose(R.map(renderOneElement), R.prop('elements'))(b))]);
     };
-    return (0, _html.div)({ className: 'awidth' }, [(0, _html.h2)(R.prop('width', b)), (0, _html.div)({ className: 'elemlist' }, R.compose(R.map(renderOneElement), R.prop('elements'))(b))]);
+    return (0, _html.div)({ className: 'target' }, [(0, _html.h1)(R.prop('route', t)), R.compose(R.map(renderBreakpoint), R.prop('targets'))(t)]);
   };
-  return (0, _html.div)({ className: 'target' }, [(0, _html.h1)(R.prop('route', t)), R.compose(R.map(renderBreakpoint), R.prop('targets'))(t)]);
 };
 
 var view = function view(state, actions) {
-  return (0, _html.div)({ className: 'main' }, [(0, _html.h1)('Screenshots list'), (0, _html.button)({ onclick: actions.loadTargets }, "load targets"), (0, _html.div)(R.map(renderResults, state.targets))]);
+  return (0, _html.div)({ className: 'main' }, [(0, _html.h1)('Screenshots list'), (0, _html.h2)({ className: state.loading ? 'loader loader--visible' : 'loader loader--hidden' }, 'Regression server is comparing latest screenshots...'), (0, _html.button)({ onclick: actions.loadTargets }, "load baseline"), (0, _html.button)({ onclick: actions.loadResults }, "load regressions"), (0, _html.div)(R.map(renderResults(state.results), state.targets))]);
 };
 
 (0, _hyperapp.app)(state, actions, view, document.body);
-},{"hyperapp":6,"@hyperapp/html":7,"./main.css":401}],18:[function(require,module,exports) {
+},{"hyperapp":6,"@hyperapp/html":7,"./main.css":401,"./utils":404}],18:[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
