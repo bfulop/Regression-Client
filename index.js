@@ -35,6 +35,8 @@ const actions = {
   onGetResults: value => R.mergeDeepLeft({results: value, loading: false})
 }
 
+const randomNum = R.compose(Math.round,R.multiply(100000),Math.random)
+
 const renderResults = r => t => {
 
   const renderBreakpoint = b => {
@@ -50,7 +52,7 @@ const renderResults = r => t => {
         h3(`${e} - ${diff}`),
         div({className: 'screenshots'}, [
           img({className: 'screenshot golden', src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`}),
-          img({className: `screenshot test ${(diff > 1) ? 'regressed' : 'same'}`, src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.testDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`})
+          img({className: `screenshot test ${(diff > 1) ? 'regressed' : 'same'}`, src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.testDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png#${randomNum()}`})
         ])
       ])
     }
@@ -60,7 +62,7 @@ const renderResults = r => t => {
     ])
   }
   return div({className:'target'},[
-    h1(R.prop('route', t)),
+    h1(R.compose(R.defaultTo('index'), R.prop('route'))(t)),
     R.compose(R.map(renderBreakpoint),R.prop('targets'))(t)
   ])
 
