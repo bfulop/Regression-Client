@@ -2,6 +2,17 @@ import { h, app } from "hyperapp"
 import { div, h1, h2, h3, img, button, pre } from "@hyperapp/html"
 import './main.css'
 import { findResult } from "./utils"
+import io from 'socket.io-client'
+
+var socket = io('http://localhost:3033');
+socket.on('connect', function(){
+  console.log('connected')
+});
+socket.on('update', function(data){
+  main.onGetResults(JSON.parse(data))
+});
+socket.on('disconnect', function(){});
+
 
 const logger = r => {
   console.log(r)
@@ -48,12 +59,18 @@ const renderResults = r => t => {
       }
       const currentShot = findResult(filterPath)(r)
       const diff = R.compose(R.defaultTo(1), R.prop('numDiffPixels'))(currentShot)
+      let shotslist = [
+          img({className: 'screenshot golden', src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`})
+      ]
+      if(diff > 0) {
+        shotslist = R.append(
+          img({className: `screenshot test ${(diff > 1) ? 'regressed' : 'same'}`, src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.testDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png?${randomNum()}`}),
+          shotslist
+        )
+      }
       return div({className: `anelem ${(diff) ? 'anelem--show' : 'anelem--hide'}`},[
         h3(`${e} - ${diff}`),
-        div({className: 'screenshots'}, [
-          img({className: 'screenshot golden', src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.goldenDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png`}),
-          img({className: `screenshot test ${(diff > 1) ? 'regressed' : 'same'}`, src:`${global.mysecretkeys.serverIP}${global.mysecretkeys.testDir}/${sanitizeText(R.prop('route',t))}/${R.prop('width', b)}/${sanitizeText(e)}.png#${randomNum()}`})
-        ])
+        div({className: 'screenshots'}, shotslist)
       ])
     }
     return div({className: 'awidth'},[
@@ -77,4 +94,4 @@ const view = (state, actions) =>
     div(R.map(renderResults(state.results), state.targets))
   ])
 
-app(state, actions, view, document.body)
+const main = app(state, actions, view, document.body)

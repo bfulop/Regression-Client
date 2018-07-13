@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "http-server ./dist -p 3041",
+    "build": "parcel build index.html"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,10 @@
   "dependencies": {
     "@hyperapp/html": "^1.1.1",
     "hyperapp": "^1.2.6",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "socket.io-client": "^2.1.1"
+  },
+  "devDependencies": {
+    "cssnano": "^4.0.1"
   }
 }
