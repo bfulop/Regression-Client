@@ -62,13 +62,21 @@ h2 {
 }
 
 .screenshot.test.regressed {
-  animation: pulsediff 5s linear infinite;
+  animation: pulsediff 9s steps(2) infinite;
   mix-blend-mode: difference;
 }
 
 @keyframes pulsediff {
-  0% { opacity: 0.1 }
-  40% { opacity: 1 }
-  60% { opacity: 1 }
-  100% { opacity: 0.1 }
+  0% { 
+  opacity: 0.82;
+  mix-blend-mode: normal;
+}
+  50% { 
+  opacity: 0.85;
+  mix-blend-mode: normal;
+}
+  100% { 
+  opacity: 1;
+  mix-blend-mode: difference;
+}
 }
