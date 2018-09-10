@@ -3,7 +3,9 @@
   background-color: silver;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: normal;
   font-size: 14px;
   max-width: 400px;
@@ -14,7 +16,7 @@ h2 {
 }
 
 .loader {
-  background-color:#0d0c0c;
+  background-color: #0d0c0c;
   color: white;
   padding: 2em;
   text-align: center;
@@ -58,7 +60,7 @@ h2 {
   position: absolute;
   top: 0;
   left: 0;
-  opacity: .3;
+  opacity: 0.3;
 }
 
 .screenshot.test.regressed {
@@ -67,16 +69,16 @@ h2 {
 }
 
 @keyframes pulsediff {
-  0% { 
-  opacity: 0.82;
-  mix-blend-mode: normal;
-}
-  50% { 
-  opacity: 0.85;
-  mix-blend-mode: normal;
-}
-  100% { 
-  opacity: 1;
-  mix-blend-mode: difference;
-}
+  0% {
+    opacity: 0.82;
+    mix-blend-mode: normal;
+  }
+  50% {
+    opacity: 0.85;
+    mix-blend-mode: normal;
+  }
+  100% {
+    opacity: 1;
+    mix-blend-mode: difference;
+  }
 }
